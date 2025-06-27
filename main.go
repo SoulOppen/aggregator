@@ -1,23 +1,30 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	"os"
 
 	"github.com/SoulOppen/aggregator/internal/config"
+	"github.com/SoulOppen/aggregator/internal/state"
 )
 
 func main() {
 	cfg, err := config.Read()
 	if err != nil {
-		log.Fatal("No se puede leer")
+		os.Exit(1)
 	}
-	cfg.SetUser("Ariel")
-	cfg, err = config.Read()
+	var states state.State
+	states.Config = &cfg
+	var commands state.Commands
+	commands.Register("login", state.HandlerLogin)
+	args := os.Args
+	if len(args) < 2 {
+		os.Exit(1)
+	}
+	var command state.Command
+	command.Name = args[1]
+	command.Args = args[2:]
+	err = commands.Run(&states, command)
 	if err != nil {
-		log.Fatal("No se puede leer")
-	}
-	for k, v := range cfg.Config {
-		fmt.Printf("%s - %s\n", k, v)
+		os.Exit(1)
 	}
 }
