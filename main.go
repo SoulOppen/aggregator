@@ -21,6 +21,7 @@ func main() {
 	if err != nil {
 		os.Exit(1)
 	}
+	defer db.Close()
 	dbQueries := database.New(db)
 	states.Db = dbQueries
 	var commands state.Commands
@@ -28,10 +29,12 @@ func main() {
 	commands.Register("register", state.HandlerRegister)
 	commands.Register("reset", state.HandlerReset)
 	commands.Register("users", state.HandlerGetUser)
+	commands.Register("agg", state.HandlerAgg)
+	commands.Register("addfeed", state.MiddlewareLoggedIn(state.AddFeed))
+	commands.Register("feeds", state.HandlerFeed)
+	commands.Register("follow", state.MiddlewareLoggedIn(state.HandlerFollow))
+	commands.Register("following", state.MiddlewareLoggedIn(state.HandlerListFeedFollows))
 	args := os.Args
-	if len(args) < 2 {
-		os.Exit(1)
-	}
 
 	var command state.Command
 	command.Name = args[1]
