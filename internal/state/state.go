@@ -220,6 +220,33 @@ func HandlerListFeedFollows(s *State, cmd Command, user database.User) error {
 
 	return nil
 }
+func HandlerUnfollow(s *State, cmd Command, user database.User) error {
+	if len(cmd.Args) != 1 {
+		return fmt.Errorf("usage: %s <feed_url>", cmd.Name)
+	}
+
+	feed, err := s.Db.GetFeedByURL(
+		context.Background(),
+		sql.NullString{
+			String: cmd.Args[0],
+			Valid:  true,
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("couldn't get feed: %w", err)
+	}
+
+	err = s.Db.DelFeedFollow(
+		context.Background(),
+		database.DelFeedFollowParams{UserID: user.ID, FeedID: feed.ID},
+	)
+	if err != nil {
+		return fmt.Errorf("couldn't unfollow feed: %w", err)
+	}
+
+	fmt.Printf("Successfully unfollowed feed: %s\n", feed.Name.String)
+	return nil
+}
 func MiddlewareLoggedIn(handler func(s *State, cmd Command, user database.User) error) func(*State, Command) error {
 	return func(s *State, cmd Command) error {
 		current, ok := s.Config.Config["current_user_name"]

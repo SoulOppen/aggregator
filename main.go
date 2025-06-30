@@ -34,6 +34,7 @@ func main() {
 	commands.Register("feeds", state.HandlerFeed)
 	commands.Register("follow", state.MiddlewareLoggedIn(state.HandlerFollow))
 	commands.Register("following", state.MiddlewareLoggedIn(state.HandlerListFeedFollows))
+	commands.Register("unfollow", state.MiddlewareLoggedIn(state.HandlerUnfollow))
 	args := os.Args
 
 	var command state.Command
